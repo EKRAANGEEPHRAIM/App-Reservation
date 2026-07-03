@@ -1,0 +1,14 @@
+$kind: http-request
+name: PATCH /bookings/:id/status → CONFIRMED
+url: "{{baseUrl}}/bookings/{{bookingId}}/status"
+method: PATCH
+headers:
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "CONFIRMED"
+    }
+order: 5000

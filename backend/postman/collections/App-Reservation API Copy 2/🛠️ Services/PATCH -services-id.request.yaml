@@ -1,0 +1,15 @@
+$kind: http-request
+name: PATCH /services/:id
+url: "{{baseUrl}}/services/{{serviceId}}"
+method: PATCH
+headers:
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "price": 85.00,
+      "description": "1h de coaching - nouveau tarif."
+    }
+order: 4000

@@ -1,0 +1,5 @@
+$kind: http-request
+name: GET /availability/provider/:providerId
+url: "{{baseUrl}}/availability/provider/{{providerId}}"
+method: GET
+order: 2000

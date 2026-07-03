@@ -1,0 +1,10 @@
+$kind: http-request
+name: GET /admin/bookings
+url: "{{baseUrl}}/admin/bookings?page=1&limit=20"
+method: GET
+headers:
+  Authorization: Bearer {{accessToken}}
+queryParams:
+  page: "1"
+  limit: "20"
+order: 2000

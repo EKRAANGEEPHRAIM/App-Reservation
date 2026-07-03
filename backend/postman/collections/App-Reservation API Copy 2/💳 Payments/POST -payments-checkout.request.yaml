@@ -1,0 +1,14 @@
+$kind: http-request
+name: POST /payments/checkout
+url: "{{baseUrl}}/payments/checkout"
+method: POST
+headers:
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "bookingId": "{{bookingId}}"
+    }
+order: 1000

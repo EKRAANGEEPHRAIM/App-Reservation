@@ -1,0 +1,11 @@
+$kind: collection
+description: "Collection complète pour tester le backend NestJS - Base URL: http://localhost:3000/api/v1"
+variables:
+  baseUrl: http://localhost:3000/api/v1
+  accessToken: ""
+  refreshToken: ""
+  userId: ""
+  providerId: ""
+  serviceId: ""
+  availabilityId: ""
+  bookingId: ""

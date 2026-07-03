@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "client@test.com",
+      "password": "Password123!"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      const res = pm.response.json();
+      if (res.accessToken) {
+        pm.collectionVariables.set('accessToken', res.accessToken);
+        pm.collectionVariables.set('refreshToken', res.refreshToken);
+      }
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      pm.test('accessToken présent', () => pm.expect(res.accessToken).to.be.a('string'));
+    language: text/javascript
+order: 3000

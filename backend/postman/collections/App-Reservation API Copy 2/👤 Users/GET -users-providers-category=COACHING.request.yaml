@@ -1,0 +1,7 @@
+$kind: http-request
+name: GET /users/providers?category=COACHING
+url: "{{baseUrl}}/users/providers?category=COACHING"
+method: GET
+queryParams:
+  category: COACHING
+order: 5000

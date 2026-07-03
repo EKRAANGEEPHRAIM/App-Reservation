@@ -1,0 +1,5 @@
+$kind: http-request
+name: GET /users/providers
+url: "{{baseUrl}}/users/providers"
+method: GET
+order: 4000

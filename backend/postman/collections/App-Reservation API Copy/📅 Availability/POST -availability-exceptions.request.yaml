@@ -1,0 +1,17 @@
+$kind: http-request
+name: POST /availability/exceptions
+url: "{{baseUrl}}/availability/exceptions"
+method: POST
+headers:
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "availabilityId": "{{availabilityId}}",
+      "exceptionDate": "2025-07-14T00:00:00.000Z",
+      "isUnavailable": true,
+      "reason": "Fête nationale"
+    }
+order: 6000

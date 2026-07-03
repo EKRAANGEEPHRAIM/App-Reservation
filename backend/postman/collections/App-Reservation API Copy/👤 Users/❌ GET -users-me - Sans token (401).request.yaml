@@ -1,0 +1,5 @@
+$kind: http-request
+name: ❌ GET /users/me - Sans token (401)
+url: "{{baseUrl}}/users/me"
+method: GET
+order: 7000

@@ -1,0 +1,7 @@
+$kind: http-request
+name: DELETE /services/:id
+url: "{{baseUrl}}/services/{{serviceId}}"
+method: DELETE
+headers:
+  Authorization: Bearer {{accessToken}}
+order: 5000

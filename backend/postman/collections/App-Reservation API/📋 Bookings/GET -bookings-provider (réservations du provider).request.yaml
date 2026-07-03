@@ -1,0 +1,7 @@
+$kind: http-request
+name: GET /bookings/provider (réservations du provider)
+url: "{{baseUrl}}/bookings/provider"
+method: GET
+headers:
+  Authorization: Bearer {{accessToken}}
+order: 3000

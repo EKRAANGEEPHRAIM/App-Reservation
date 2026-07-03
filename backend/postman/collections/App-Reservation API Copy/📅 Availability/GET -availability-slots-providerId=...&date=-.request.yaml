@@ -1,0 +1,8 @@
+$kind: http-request
+name: GET /availability/slots?providerId=...&date=...
+url: "{{baseUrl}}/availability/slots?providerId={{providerId}}&date=2025-07-07"
+method: GET
+queryParams:
+  providerId: "{{providerId}}"
+  date: 2025-07-07
+order: 3000

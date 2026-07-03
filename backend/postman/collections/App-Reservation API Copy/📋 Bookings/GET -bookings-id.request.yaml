@@ -1,0 +1,7 @@
+$kind: http-request
+name: GET /bookings/:id
+url: "{{baseUrl}}/bookings/{{bookingId}}"
+method: GET
+headers:
+  Authorization: Bearer {{accessToken}}
+order: 4000

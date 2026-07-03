@@ -1,0 +1,15 @@
+$kind: http-request
+name: PATCH /bookings/:id/status → CANCELLED
+url: "{{baseUrl}}/bookings/{{bookingId}}/status"
+method: PATCH
+headers:
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "CANCELLED",
+      "cancelReason": "Indisponibilité du client."
+    }
+order: 6000

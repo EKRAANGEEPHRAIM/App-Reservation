@@ -1,0 +1,7 @@
+$kind: http-request
+name: GET /admin/revenue
+url: "{{baseUrl}}/admin/revenue"
+method: GET
+headers:
+  Authorization: Bearer {{accessToken}}
+order: 4000

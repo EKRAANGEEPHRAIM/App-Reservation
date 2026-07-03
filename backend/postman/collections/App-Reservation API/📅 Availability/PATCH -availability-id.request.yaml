@@ -1,0 +1,15 @@
+$kind: http-request
+name: PATCH /availability/:id
+url: "{{baseUrl}}/availability/{{availabilityId}}"
+method: PATCH
+headers:
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "startTime": "10:00",
+      "endTime": "18:00"
+    }
+order: 4000

@@ -1,0 +1,14 @@
+# Use this workspace to collaborate
+workspace:
+  id: c329d0e0-9ffe-4aba-b28a-6c9a09e1b072
+
+localResources:
+  collections:
+    - ../App-Reservation.postman_collection.json
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/App-Reservation API: 0885841c-0b21-44ad-be69-4410ea44f88b
+    ../postman/collections/App-Reservation API Copy: ca6bac32-5200-4093-8cd5-a42e17a603bd

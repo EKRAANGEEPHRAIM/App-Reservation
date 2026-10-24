@@ -26,7 +26,7 @@ async function bootstrap(): Promise<void> {
 
   app.enableCors({
     origin: process.env.FRONTEND_URL ?? 'http://localhost:4200',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     maxAge: 86400,
@@ -35,8 +35,10 @@ async function bootstrap(): Promise<void> {
 
 
 
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(`🚀 Backend running on http://localhost:${process.env.PORT}/api/v1`);
+  // 0.0.0.0 : Fastify écoute sinon uniquement sur localhost, injoignable sur Render
+  const port = Number(process.env.PORT ?? 3000);
+  await app.listen(port, '0.0.0.0');
+  console.log(`🚀 Backend running on http://localhost:${port}/api/v1`);
 }
 
 void bootstrap();

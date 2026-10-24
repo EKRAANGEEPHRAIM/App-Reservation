@@ -1,0 +1,18 @@
+# Dépendances et builds
+node_modules/
+dist/
+.angular/
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

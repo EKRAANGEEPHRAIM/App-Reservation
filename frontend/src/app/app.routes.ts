@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { providerGuard } from './core/guards/provider.guard';
 
 export const routes: Routes = [
   {
@@ -12,13 +13,18 @@ export const routes: Routes = [
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.authRoutes),
   },
   {
+    // Le choix de la prestation et de l'horaire est public ; la connexion est demandée à la confirmation
     path: 'booking',
-    canActivate: [authGuard],
     loadChildren: () => import('./features/booking/booking.routes').then((m) => m.bookingRoutes),
   },
   {
+    path: 'provider',
+    canActivate: [authGuard, providerGuard],
+    loadChildren: () => import('./features/provider/provider.routes').then((m) => m.providerRoutes),
+  },
+  {
     path: 'availability',
-    canActivate: [authGuard],
+    canActivate: [authGuard, providerGuard],
     loadChildren: () => import('./features/availability/availability.routes').then((m) => m.availabilityRoutes),
   },
   {

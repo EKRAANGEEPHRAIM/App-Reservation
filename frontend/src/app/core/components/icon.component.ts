@@ -22,6 +22,12 @@ import {
   LucideUsers,
   LucideXCircle,
   LucideAlertCircle,
+  LucideCheck,
+  LucideClock,
+  LucideMapPin,
+  LucideMenu,
+  LucidePhone,
+  LucideX,
 } from '@lucide/angular';
 
 const ICONS: Record<string, LucideIconInput> = {
@@ -45,6 +51,12 @@ const ICONS: Record<string, LucideIconInput> = {
   Users: LucideUsers,
   XCircle: LucideXCircle,
   AlertCircle: LucideAlertCircle,
+  Check: LucideCheck,
+  Clock: LucideClock,
+  MapPin: LucideMapPin,
+  Menu: LucideMenu,
+  Phone: LucidePhone,
+  X: LucideX,
 };
 
 @Component({

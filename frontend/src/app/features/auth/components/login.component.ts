@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../../core/components/icon.component';
@@ -15,7 +15,7 @@ import { AuthStore } from '../store/auth.store';
       <div class="auth-card">
         <div class="auth-header">
           <h1 class="auth-title">Connexion</h1>
-          <p class="auth-subtitle">Accédez à votre espace réservation</p>
+          <p class="auth-subtitle">Accédez à vos rendez-vous chez Maison Awa</p>
         </div>
 
         <form (ngSubmit)="onSubmit()" class="auth-form">
@@ -76,7 +76,7 @@ import { AuthStore } from '../store/auth.store';
 
         <p class="auth-footer">
           Pas encore de compte ?
-          <a routerLink="/auth/register" class="auth-link">S'inscrire</a>
+          <a routerLink="/auth/register" [queryParams]="{ returnUrl: returnUrl() }" class="auth-link">S'inscrire</a>
         </p>
       </div>
     </div>
@@ -89,8 +89,11 @@ export class LoginComponent {
   protected password = '';
   protected showPassword = signal(false);
 
+  /** Page à rouvrir après la connexion (ex. : le récapitulatif de réservation) */
+  readonly returnUrl = input<string>();
+
   protected onSubmit(): void {
     if (!this.email || !this.password) return;
-    this.authStore.login({ email: this.email, password: this.password });
+    this.authStore.login({ email: this.email, password: this.password, returnUrl: this.returnUrl() });
   }
 }

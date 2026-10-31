@@ -26,6 +26,13 @@ export class AvailabilityController {
     return this.availabilityService.create(req.user.id, dto);
   }
 
+  // Déclarée avant provider/:providerId pour que "me" ne soit pas pris pour un id
+  @Get('provider/me')
+  @UseGuards(AuthGuard('jwt'))
+  async findMine(@Request() req: AuthRequest) {
+    return this.availabilityService.findMine(req.user.id);
+  }
+
   @Get('provider/:providerId')
   async findByProvider(@Param('providerId') providerId: string) {
     return this.availabilityService.findByProvider(providerId);
@@ -35,30 +42,33 @@ export class AvailabilityController {
   async getSlots(
     @Query('providerId') providerId: string,
     @Query('date') date: string,
+    @Query('serviceId') serviceId: string,
   ) {
-    return this.availabilityService.getSlotsForDate(providerId, date);
+    return this.availabilityService.getSlotsForDate(providerId, date, serviceId);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
   async update(
+    @Request() req: AuthRequest,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateAvailabilitySchema)) dto: UpdateAvailabilityDto,
   ) {
-    return this.availabilityService.update(id, dto);
+    return this.availabilityService.update(id, dto, req.user.id);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
-  async remove(@Param('id') id: string) {
-    return this.availabilityService.remove(id);
+  async remove(@Request() req: AuthRequest, @Param('id') id: string) {
+    return this.availabilityService.remove(id, req.user.id);
   }
 
   @Post('exceptions')
   @UseGuards(AuthGuard('jwt'))
   async createException(
+    @Request() req: AuthRequest,
     @Body(new ZodValidationPipe(CreateExceptionSchema)) dto: CreateExceptionDto,
   ) {
-    return this.availabilityService.createException(dto);
+    return this.availabilityService.createException(dto, req.user.id);
   }
 }

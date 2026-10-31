@@ -55,9 +55,10 @@ export class UsersService {
       },
       include: {
         user: {
-          select: { firstName: true, lastName: true, avatarUrl: true, email: true },
+          // Liste publique : pas d'e-mail
+          select: { firstName: true, lastName: true, avatarUrl: true },
         },
-        services: { where: { isActive: true } },
+        services: { where: { isActive: true }, orderBy: { price: 'asc' } },
       },
     });
   }

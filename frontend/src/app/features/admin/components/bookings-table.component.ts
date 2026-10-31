@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../../core/components/icon.component';
 import { AdminStore } from '../store/admin.store';
@@ -23,7 +23,7 @@ const STATUS_STYLES: Record<string, string> = {
 @Component({
   selector: 'app-bookings-table',
   standalone: true,
-  imports: [DatePipe, RouterLink, IconComponent],
+  imports: [DatePipe, DecimalPipe, RouterLink, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./bookings-table.component.css'],
   template: `
@@ -82,7 +82,7 @@ const STATUS_STYLES: Record<string, string> = {
                         {{ booking.status }}
                       </span>
                     </td>
-                    <td class="cell-right cell-bold">{{ booking.price }}€</td>
+                    <td class="cell-right cell-bold">{{ booking.price | number: '1.0-0' }} FCFA</td>
                   </tr>
                 }
               </tbody>
@@ -106,7 +106,7 @@ const STATUS_STYLES: Record<string, string> = {
                     <app-icon name="Calendar" class="icon-xs" />
                     {{ booking.startAt | date:'dd/MM/yyyy HH:mm' }}
                   </span>
-                  <span class="card-price">{{ booking.price }}€</span>
+                  <span class="card-price">{{ booking.price | number: '1.0-0' }} FCFA</span>
                 </div>
               </div>
             }

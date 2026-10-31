@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { computed } from '@angular/core';
-import { pipe, switchMap, tap, catchError, EMPTY } from 'rxjs';
+import { pipe, switchMap, tap, catchError, EMPTY, map, of, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
@@ -14,6 +14,17 @@ interface User {
   lastName: string;
   role: 'CLIENT' | 'PROVIDER' | 'ADMIN';
 }
+
+/** Page d'accueil après connexion, selon le rôle */
+const HOME_BY_ROLE: Record<User['role'], string> = {
+  CLIENT: '/booking',
+  PROVIDER: '/provider/bookings',
+  ADMIN: '/admin',
+};
+
+// Seuls les chemins internes sont suivis, jamais une URL externe passée en paramètre
+const afterLoginUrl = (user: User, returnUrl?: string): string =>
+  returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : HOME_BY_ROLE[user.role];
 
 interface AuthState {
   user: User | null;
@@ -48,10 +59,10 @@ export const AuthStore = signalStore(
     const apiUrl = environment.apiUrl;
 
     return {
-      login: rxMethod<{ email: string; password: string }>(
+      login: rxMethod<{ email: string; password: string; returnUrl?: string }>(
         pipe(
           tap(() => patchState(store, { loading: true, error: null })),
-          switchMap((credentials) =>
+          switchMap(({ returnUrl, ...credentials }) =>
             http.post<{ accessToken: string; refreshToken: string }>(
               `${apiUrl}/auth/login`,
               credentials,
@@ -65,7 +76,7 @@ export const AuthStore = signalStore(
                 http.get<User>(`${apiUrl}/users/me`).pipe(
                   tap((user) => {
                     patchState(store, { user });
-                    void router.navigate([user.role === 'ADMIN' ? '/admin' : '/booking']);
+                    void router.navigateByUrl(afterLoginUrl(user, returnUrl));
                   }),
                 ),
               ),
@@ -78,10 +89,10 @@ export const AuthStore = signalStore(
         ),
       ),
 
-      register: rxMethod<{ email: string; password: string; firstName: string; lastName: string; role?: string }>(
+      register: rxMethod<{ email: string; password: string; firstName: string; lastName: string; returnUrl?: string }>(
         pipe(
           tap(() => patchState(store, { loading: true, error: null })),
-          switchMap((data) =>
+          switchMap(({ returnUrl, ...data }) =>
             http.post<{ accessToken: string; refreshToken: string }>(
               `${apiUrl}/auth/register`,
               data,
@@ -93,7 +104,10 @@ export const AuthStore = signalStore(
               }),
               switchMap(() =>
                 http.get<User>(`${apiUrl}/users/me`).pipe(
-                  tap((user) => patchState(store, { user })),
+                  tap((user) => {
+                    patchState(store, { user });
+                    void router.navigateByUrl(afterLoginUrl(user, returnUrl));
+                  }),
                 ),
               ),
               catchError((err: { error?: { message?: string } }) => {
@@ -118,6 +132,25 @@ export const AuthStore = signalStore(
           ),
         ),
       ),
+
+      /**
+       * Recharge l'utilisateur à partir du jeton stocké (rechargement de page,
+       * retour depuis Stripe Checkout). Émet true si la session est valide.
+       */
+      restoreSession(): Observable<boolean> {
+        if (store.user()) return of(true);
+        if (!store.accessToken()) return of(false);
+        return http.get<User>(`${apiUrl}/users/me`).pipe(
+          tap((user) => patchState(store, { user })),
+          map(() => true),
+          catchError(() => {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            patchState(store, { user: null, accessToken: null, refreshToken: null });
+            return of(false);
+          }),
+        );
+      },
 
       logout(): void {
         localStorage.removeItem('accessToken');

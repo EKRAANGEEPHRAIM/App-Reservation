@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCheckoutSessionDto } from './schemas/payment.schema';
 
+const ZERO_DECIMAL_CURRENCIES = new Set(['XOF', 'XAF', 'JPY', 'KRW']);
+
 @Injectable()
 export class PaymentsService {
   private readonly stripe: Stripe;
@@ -22,9 +24,12 @@ export class PaymentsService {
 
     if (!booking) throw new NotFoundException('Booking not found');
     if (booking.clientId !== userId) throw new BadRequestException('Unauthorized');
-    if (booking.payment) throw new BadRequestException('Payment already exists');
+    if (booking.payment?.status === 'PAID') throw new BadRequestException('Booking already paid');
+    if (booking.status !== 'PENDING') throw new BadRequestException('Booking cannot be paid');
 
-    const amountInCents = Math.round(Number(booking.service.price) * 100);
+    // Stripe attend la plus petite unité : centimes pour l'euro, mais le franc CFA (XOF) n'a pas de décimales
+    const zeroDecimal = ZERO_DECIMAL_CURRENCIES.has(booking.service.currency.toUpperCase());
+    const amountInCents = Math.round(Number(booking.service.price) * (zeroDecimal ? 1 : 100));
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -44,12 +49,15 @@ export class PaymentsService {
         },
       ],
       success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/booking/${dto.bookingId}`,
+      cancel_url: `${process.env.FRONTEND_URL}/booking?payment=cancelled`,
       metadata: { bookingId: dto.bookingId },
     });
 
-    await this.prisma.payment.create({
-      data: {
+    // Un paiement abandonné ou expiré peut être relancé : la nouvelle session remplace l'ancienne
+    await this.prisma.payment.upsert({
+      where: { bookingId: dto.bookingId },
+      update: { stripeSessionId: session.id, status: 'PENDING' },
+      create: {
         bookingId: dto.bookingId,
         stripeSessionId: session.id,
         amount: booking.service.price,

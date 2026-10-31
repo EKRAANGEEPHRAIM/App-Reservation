@@ -1,6 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto, UpdateBookingStatusDto } from './schemas/booking.schema';
+
+interface AuthUser { id: string; role: string }
 
 @Injectable()
 export class BookingsService {
@@ -10,7 +12,10 @@ export class BookingsService {
     const service = await this.prisma.service.findUnique({ where: { id: dto.serviceId } });
     if (!service || !service.isActive) throw new NotFoundException('Service not found');
 
+    if (service.providerId !== dto.providerId) throw new BadRequestException('Service does not belong to provider');
+
     const startAt = new Date(dto.startAt);
+    if (startAt.getTime() <= Date.now()) throw new BadRequestException('Time slot is in the past');
     const endAt = new Date(startAt.getTime() + service.durationMin * 60 * 1000);
 
     const conflict = await this.prisma.booking.findFirst({
@@ -52,9 +57,13 @@ export class BookingsService {
     });
   }
 
-  async findByProvider(providerId: string) {
+  // Le JWT porte l'id de l'utilisateur : on retrouve sa fiche prestataire
+  async findByProviderUser(userId: string) {
+    const provider = await this.prisma.provider.findUnique({ where: { userId } });
+    if (!provider) throw new ForbiddenException('Provider profile required');
+
     return this.prisma.booking.findMany({
-      where: { providerId },
+      where: { providerId: provider.id },
       include: {
         service: true,
         client: { select: { firstName: true, lastName: true, email: true, phone: true } },
@@ -67,14 +76,31 @@ export class BookingsService {
   async findById(id: string) {
     const booking = await this.prisma.booking.findUnique({
       where: { id },
-      include: { service: true, payment: true, client: true, provider: true },
+      include: {
+        service: true,
+        payment: true,
+        client: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
+        provider: true,
+      },
     });
     if (!booking) throw new NotFoundException('Booking not found');
     return booking;
   }
 
-  async updateStatus(id: string, dto: UpdateBookingStatusDto) {
-    await this.findById(id);
+  // Le prestataire de la réservation et l'admin changent tous les statuts ;
+  // le client ne peut qu'annuler sa propre réservation.
+  async updateStatus(id: string, dto: UpdateBookingStatusDto, user: AuthUser) {
+    const booking = await this.findById(id);
+    const isOwnerProvider = booking.provider.userId === user.id;
+    const isOwnerClient = booking.clientId === user.id;
+    const allowed =
+      user.role === 'ADMIN' || isOwnerProvider || (isOwnerClient && dto.status === 'CANCELLED');
+    if (!allowed) throw new ForbiddenException('Not allowed to change this booking');
+
+    if (['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(booking.status)) {
+      throw new BadRequestException('Booking is already closed');
+    }
+
     return this.prisma.booking.update({
       where: { id },
       data: { status: dto.status, cancelReason: dto.cancelReason },

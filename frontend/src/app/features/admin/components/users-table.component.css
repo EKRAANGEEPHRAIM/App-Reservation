@@ -1,7 +1,7 @@
 /* Users table styles */
 
 .users-page {
-  min-height: 100vh;
+  min-height: 70vh;
   background-color: var(--gray-50);
 }
 

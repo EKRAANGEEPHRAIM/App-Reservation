@@ -10,7 +10,7 @@ interface Booking {
   endAt: string;
   status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW';
   notes?: string;
-  service: { id: string; name: string; price: number; durationMin: number };
+  service: { id: string; name: string; price: number | string; durationMin: number; currency: string };
   provider: { id: string; user: { firstName: string; lastName: string; avatarUrl?: string } };
   payment?: { status: string; amount: number } | null;
 }
@@ -19,6 +19,8 @@ interface BookingState {
   bookings: Booking[];
   selectedBooking: Booking | null;
   loading: boolean;
+  /** Réservation dont le paiement ou l'annulation est en cours */
+  actionId: string | null;
   error: string | null;
 }
 
@@ -26,6 +28,7 @@ const initialState: BookingState = {
   bookings: [],
   selectedBooking: null,
   loading: false,
+  actionId: null,
   error: null,
 };
 
@@ -75,6 +78,42 @@ export const BookingStore = signalStore(
               ),
               catchError((err: { error?: { message?: string } }) => {
                 patchState(store, { loading: false, error: err.error?.message ?? 'Booking failed' });
+                return EMPTY;
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      // Crée une session Stripe Checkout puis quitte l'application vers la page de paiement
+      payBooking: rxMethod<string>(
+        pipe(
+          tap((id) => patchState(store, { actionId: id, error: null })),
+          switchMap((bookingId) =>
+            api.post<{ url: string }>('/payments/checkout', { bookingId }).pipe(
+              tap(({ url }) => window.location.assign(url)),
+              catchError((err: { error?: { message?: string } }) => {
+                patchState(store, { actionId: null, error: err.error?.message ?? 'Payment failed' });
+                return EMPTY;
+              }),
+            ),
+          ),
+        ),
+      ),
+
+      cancelBooking: rxMethod<string>(
+        pipe(
+          tap((id) => patchState(store, { actionId: id, error: null })),
+          switchMap((id) =>
+            api.patch<{ status: Booking['status'] }>(`/bookings/${id}/status`, { status: 'CANCELLED' }).pipe(
+              tap(({ status }) =>
+                patchState(store, {
+                  actionId: null,
+                  bookings: store.bookings().map((b) => (b.id === id ? { ...b, status } : b)),
+                }),
+              ),
+              catchError((err: { error?: { message?: string } }) => {
+                patchState(store, { actionId: null, error: err.error?.message ?? 'Cancellation failed' });
                 return EMPTY;
               }),
             ),

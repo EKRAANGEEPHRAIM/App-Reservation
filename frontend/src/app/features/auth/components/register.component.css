@@ -1,7 +1,7 @@
 /* Register page styles — reuse auth patterns from login.component.css */
 
 .auth-page {
-  min-height: 100vh;
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;

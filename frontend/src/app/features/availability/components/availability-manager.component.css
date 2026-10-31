@@ -1,18 +1,18 @@
 /* Availability manager styles */
 
 .availability-page {
-  min-height: 100vh;
-  background-color: var(--gray-50);
+  min-height: 70vh;
+  background-color: transparent;
 }
 
 .page-header {
-  padding: var(--space-4) var(--space-6);
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  max-width: var(--container-md); margin: 0 auto; padding: var(--space-10) var(--space-6) 0;
+  background-color: transparent;
+  border-bottom: none;
 }
 
 .page-header h1 {
-  font-size: var(--font-xl);
+  font-size: var(--font-4xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
   margin-bottom: var(--space-1);

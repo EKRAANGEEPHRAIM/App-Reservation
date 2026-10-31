@@ -1,26 +1,18 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../../core/components/icon.component';
 import { BookingStore } from '../store/booking.store';
 import { AuthStore } from '../../auth/store/auth.store';
-
-const STATUS_ICON: Record<string, string> = {
-  CONFIRMED: 'CheckCircle2',
-  CANCELLED: 'XCircle',
-  PENDING: 'AlertCircle',
-};
-
-const STATUS_ICON_BG: Record<string, string> = {
-  CONFIRMED: 'status-icon-success',
-  CANCELLED: 'status-icon-danger',
-  PENDING: 'status-icon-warning',
-};
+import { STATUS_LABEL } from '../../../core/utils/booking-status';
+import { formatDuration, formatPrice } from '../../../core/config/salon';
 
 const STATUS_CHIP: Record<string, string> = {
-  CONFIRMED: 'status-chip-success',
-  CANCELLED: 'status-chip-danger',
-  PENDING: 'status-chip-warning',
+  CONFIRMED: 'chip-success',
+  COMPLETED: 'chip-success',
+  CANCELLED: 'chip-danger',
+  NO_SHOW: 'chip-danger',
+  PENDING: 'chip-warning',
 };
 
 @Component({
@@ -30,60 +22,94 @@ const STATUS_CHIP: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./booking-list.component.css'],
   template: `
-    <div class="booking-list-page">
-      <header class="page-header">
-        <div class="page-header-title">
-          <h1>Mes réservations</h1>
-          <p>Bonjour, {{ authStore.fullName() }}</p>
+    <div class="inner-page">
+      <header class="head">
+        <div>
+          <h1 class="inner-page-title">Mes réservations</h1>
+          <p class="inner-page-lead">Bonjour {{ authStore.user()?.firstName }}, voici vos rendez-vous chez Maison Awa.</p>
         </div>
-        <a routerLink="/booking/new" class="btn-new">
+        <a routerLink="/booking/new" class="btn-brand">
           <app-icon name="Plus" class="icon-sm" />
-          Nouvelle réservation
+          Nouveau rendez-vous
         </a>
       </header>
 
-      <main class="page-content">
-        @if (store.loading()) {
-          <div class="loading-state">
-            <div class="spinner"></div>
-          </div>
-        } @else if (store.bookings().length === 0) {
-          <div class="empty-state">
-            <app-icon name="Calendar" class="empty-icon" />
-            <h3>Aucune réservation</h3>
-            <p>Commencez par réserver un service</p>
-            <a routerLink="/booking/new" class="btn-primary">Réserver maintenant</a>
-          </div>
-        } @else {
-          <div class="booking-list">
-            @for (booking of store.bookings(); track booking.id) {
-              <div class="booking-card">
-                <div class="booking-main">
-                  <div class="status-icon" [class]="iconBgClass(booking.status)">
-                    <app-icon [name]="statusIcon(booking.status)" class="icon-md" />
-                  </div>
-                  <div class="booking-info">
-                    <p class="booking-service">{{ booking.service.name }}</p>
-                    <p class="booking-meta">
-                      {{ booking.startAt | date:'dd MMM yyyy à HH:mm' : '' : 'fr-FR' }}
-                      · {{ booking.service.durationMin }}min
-                    </p>
-                    <p class="booking-provider">
-                      {{ booking.provider.user.firstName }} {{ booking.provider.user.lastName }}
-                    </p>
-                  </div>
-                </div>
-                <div class="booking-aside">
-                  <p class="booking-price">{{ booking.service.price }} €</p>
-                  <span class="status-chip" [class]="chipClass(booking.status)">
-                    {{ booking.status }}
-                  </span>
-                </div>
+      @if (booked()) {
+        <div class="alert alert-success">
+          Demande envoyée ! Votre coiffeuse va la confirmer ; vous paierez au salon le jour du rendez-vous.
+        </div>
+      }
+      @if (payment() === 'cancelled') {
+        <div class="alert alert-warning">
+          Paiement annulé : votre réservation reste en attente, vous pouvez payer plus tard.
+        </div>
+      }
+      @if (store.error()) {
+        <div class="alert alert-error">{{ store.error() }}</div>
+      }
+
+      @if (store.loading()) {
+        <div class="state"><div class="spinner"></div></div>
+      } @else if (store.bookings().length === 0) {
+        <div class="state">
+          <app-icon name="Calendar" class="empty-icon" />
+          <h2>Aucun rendez-vous pour l'instant</h2>
+          <p>Choisissez une prestation et un horaire en moins d'une minute.</p>
+          <a routerLink="/booking/new" class="btn-brand">Prendre rendez-vous</a>
+        </div>
+      } @else {
+        <div class="list">
+          @for (booking of store.bookings(); track booking.id) {
+            <article class="card">
+              <div class="when">
+                <span class="when-day">{{ booking.startAt | date: 'd' : 'UTC' }}</span>
+                <span class="when-month">{{ booking.startAt | date: 'MMM' : 'UTC' }}</span>
               </div>
-            }
-          </div>
-        }
-      </main>
+              <div class="info">
+                <p class="service">{{ booking.service.name }}</p>
+                <p class="meta">
+                  {{ booking.startAt | date: 'EEEE à HH:mm' : 'UTC' }} · {{ duration(booking.service.durationMin) }}
+                </p>
+                <p class="meta">avec {{ booking.provider.user.firstName }} {{ booking.provider.user.lastName }}</p>
+              </div>
+              <div class="aside">
+                <p class="price">{{ price(booking.service.price, booking.service.currency) }}</p>
+                <span class="chip" [class]="chipClass(booking.status)">{{ statusLabel(booking.status) }}</span>
+                @if (booking.payment?.status === 'PAID') {
+                  <p class="paid-label">Payé en ligne</p>
+                }
+                @if (booking.status === 'PENDING') {
+                  <div class="action-row">
+                    @if (booking.payment?.status !== 'PAID') {
+                      <button
+                        type="button"
+                        class="btn-action btn-action-primary"
+                        [disabled]="store.actionId() !== null"
+                        (click)="store.payBooking(booking.id)"
+                      >
+                        @if (store.actionId() === booking.id) {
+                          <app-icon name="Loader2" class="icon-sm animate-spin" />
+                        } @else {
+                          <app-icon name="CreditCard" class="icon-sm" />
+                        }
+                        Payer
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      class="btn-action btn-action-danger"
+                      [disabled]="store.actionId() !== null"
+                      (click)="cancel(booking.id)"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      }
     </div>
   `,
 })
@@ -91,19 +117,27 @@ export class BookingListComponent {
   protected readonly store = inject(BookingStore);
   protected readonly authStore = inject(AuthStore);
 
+  /** ?payment=cancelled au retour de Stripe Checkout */
+  readonly payment = input<string>();
+  /** ?booked=1 après une réservation payable au salon */
+  readonly booked = input<string>();
+
   constructor() {
     this.store.loadMyBookings();
   }
 
-  protected statusIcon(status: string): string {
-    return STATUS_ICON[status] ?? 'AlertCircle';
+  protected cancel(id: string): void {
+    if (confirm('Annuler ce rendez-vous ?')) this.store.cancelBooking(id);
   }
 
-  protected iconBgClass(status: string): string {
-    return STATUS_ICON_BG[status] ?? 'status-icon-warning';
+  protected statusLabel(status: string): string {
+    return STATUS_LABEL[status] ?? status;
   }
 
   protected chipClass(status: string): string {
-    return STATUS_CHIP[status] ?? 'status-chip-default';
+    return STATUS_CHIP[status] ?? 'chip-default';
   }
+
+  protected readonly price = formatPrice;
+  protected readonly duration = formatDuration;
 }

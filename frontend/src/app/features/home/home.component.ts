@@ -1,7 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { catchError, map, of } from 'rxjs';
 import { IconComponent } from '../../core/components/icon.component';
-import { AuthStore } from '../auth/store/auth.store';
+import { SALON, SALON_IMAGES, formatDuration, formatPrice } from '../../core/config/salon';
+import { SalonService } from '../../core/services/salon.service';
+import { Stylist, initials, stylistName } from '../../core/models/salon.models';
+
+type StylistsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; stylists: Stylist[] };
 
 @Component({
   selector: 'app-home',
@@ -10,73 +16,170 @@ import { AuthStore } from '../auth/store/auth.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./home.component.css'],
   template: `
-    <div class="home-page">
-      <nav class="navbar">
-        <div class="brand">ReserveApp</div>
-        <div class="nav-actions">
-          @if (authStore.isAuthenticated()) {
-            <span class="user-name">{{ authStore.fullName() }}</span>
-            <a routerLink="/booking" class="btn-primary">Mes réservations</a>
-            @if (authStore.isAdmin()) {
-              <a routerLink="/admin" class="nav-link">Admin</a>
+    <!-- Accroche -->
+    <section class="hero" [style.background-image]="'url(' + images.hero + ')'">
+      <div class="hero-inner">
+        <span class="eyebrow eyebrow-light">Cocody · Abidjan</span>
+        <h1>L'art de la tresse et du soin, sur rendez-vous.</h1>
+        <p class="hero-text">
+          Tresses, nattes, coupe et soins des cheveux naturels. Choisissez votre prestation,
+          votre coiffeuse et votre horaire en moins d'une minute.
+        </p>
+        <div class="hero-actions">
+          <a routerLink="/booking/new" class="btn-brand btn-hero">Prendre rendez-vous</a>
+          <a routerLink="/" fragment="prestations" class="btn-ghost">Voir les tarifs</a>
+        </div>
+        <ul class="hero-facts">
+          <li><app-icon name="Clock" class="icon-sm" /> Mardi – samedi, 9h – 19h</li>
+          <li><app-icon name="CreditCard" class="icon-sm" /> Paiement en ligne ou au salon</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Prestations et tarifs -->
+    <section id="prestations" class="section">
+      <div class="section-head">
+        <span class="eyebrow">Prestations & tarifs</span>
+        <h2>Des prix clairs, affichés avant de réserver</h2>
+      </div>
+
+      @switch (state().status) {
+        @case ('loading') {
+          <p class="muted center">Chargement des prestations… (le premier chargement peut prendre 30 secondes)</p>
+        }
+        @case ('error') {
+          <p class="muted center">Les prestations ne sont pas disponibles pour le moment. Réessayez dans un instant.</p>
+        }
+        @case ('ready') {
+          <div class="menu">
+            @for (stylist of stylists(); track stylist.id) {
+              <div class="menu-group">
+                <h3 class="menu-title">Avec {{ name(stylist) }}</h3>
+                <p class="menu-by">{{ stylist.bio }}</p>
+                @for (service of stylist.services; track service.id) {
+                  <a
+                    class="menu-item"
+                    routerLink="/booking/new"
+                    [queryParams]="{ provider: stylist.id, service: service.id }"
+                  >
+                    <div class="menu-line">
+                      <span class="menu-name">{{ service.name }}</span>
+                      <span class="menu-dots" aria-hidden="true"></span>
+                      <span class="menu-price">{{ price(service.price, service.currency) }}</span>
+                    </div>
+                    <p class="menu-desc">{{ service.description }} · {{ duration(service.durationMin) }}</p>
+                  </a>
+                }
+              </div>
             }
-            <button (click)="authStore.logout()" class="nav-link nav-link-danger">Déconnexion</button>
-          } @else {
-            <a routerLink="/auth/login" class="nav-link">Se connecter</a>
-            <a routerLink="/auth/register" class="btn-primary">S'inscrire</a>
+          </div>
+        }
+      }
+    </section>
+
+    <!-- Le salon -->
+    <section class="split">
+      <img class="split-img" [src]="images.interior" alt="Intérieur du salon : fauteuils et miroirs ronds" loading="lazy" />
+      <div class="split-text">
+        <span class="eyebrow">Le salon</span>
+        <h2>Votre créneau vous attend, sans file d'attente</h2>
+        <ul class="checks">
+          <li><app-icon name="Check" class="icon-sm" /> Un horaire réservé est un horaire tenu : pas d'attente sur place.</li>
+          <li><app-icon name="Check" class="icon-sm" /> Des produits choisis pour les cheveux crépus, frisés et défrisés.</li>
+          <li><app-icon name="Check" class="icon-sm" /> Confirmation de votre coiffeuse dès qu'elle valide la demande.</li>
+        </ul>
+        <a routerLink="/booking/new" class="btn-brand">Réserver mon créneau</a>
+      </div>
+    </section>
+
+    <!-- Équipe -->
+    <section id="equipe" class="section">
+      <div class="section-head">
+        <span class="eyebrow">L'équipe</span>
+        <h2>Des spécialistes pour chaque style</h2>
+      </div>
+      @if (state().status === 'ready') {
+        <div class="team">
+          @for (stylist of stylists(); track stylist.id) {
+            <article class="member">
+              <div class="avatar">{{ initials(stylist) }}</div>
+              <h3>{{ name(stylist) }}</h3>
+              <p class="member-bio">{{ stylist.bio }}</p>
+              <a
+                routerLink="/booking/new"
+                [queryParams]="{ provider: stylist.id }"
+                class="member-link"
+              >
+                Réserver avec {{ stylist.user.firstName }}
+                <app-icon name="ArrowRight" class="icon-sm" />
+              </a>
+            </article>
           }
         </div>
-      </nav>
+      }
+    </section>
 
-      <section class="hero">
-        <div class="hero-content">
-          <h1 class="hero-title">
-            Réservez vos rendez-vous<br/>
-            <span class="hero-accent">en quelques clics</span>
-          </h1>
-          <p class="hero-description">
-            Coaching, coiffure, médical — trouvez le prestataire idéal et réservez directement en ligne avec paiement sécurisé.
-          </p>
-          <div class="hero-buttons">
-            <a routerLink="/auth/register" class="btn-cta">
-              Commencer gratuitement
-              <app-icon name="ArrowRight" class="icon-sm" />
-            </a>
-            <a routerLink="/auth/login" class="btn-outline">Se connecter</a>
-          </div>
-        </div>
-      </section>
+    <!-- Galerie -->
+    <section class="gallery" aria-label="Réalisations">
+      <img [src]="images.braids" alt="Queue de cheval tressée, de profil" loading="lazy" />
+      <div class="gallery-quote">
+        <p>« Des coiffures protectrices qui tiennent, réalisées dans le respect de vos cheveux. »</p>
+        <span>— L'esprit de la maison</span>
+      </div>
+      <img [src]="images.locs" alt="Portrait d'une femme aux longues locks" loading="lazy" />
+    </section>
 
-      <section class="features">
-        <div class="features-grid">
-          <article class="feature-card">
-            <div class="feature-icon feature-icon-primary">
-              <app-icon name="Calendar" class="icon-md" />
-            </div>
-            <h3 class="feature-title">Calendrier intelligent</h3>
-            <p class="feature-text">Visualisez les disponibilités en temps réel et choisissez votre créneau idéal.</p>
-          </article>
+    <!-- Comment ça marche -->
+    <section class="section steps-section">
+      <div class="section-head">
+        <span class="eyebrow">Réserver en ligne</span>
+        <h2>Trois étapes, moins d'une minute</h2>
+      </div>
+      <ol class="steps">
+        <li><span class="step-num">1</span><h3>Choisissez</h3><p>La prestation et la coiffeuse qui vous conviennent.</p></li>
+        <li><span class="step-num">2</span><h3>Réservez</h3><p>Un horaire parmi les créneaux réellement libres.</p></li>
+        <li><span class="step-num">3</span><h3>Venez</h3><p>Payez en ligne maintenant, ou au salon le jour J.</p></li>
+      </ol>
+    </section>
 
-          <article class="feature-card">
-            <div class="feature-icon feature-icon-success">
-              <app-icon name="CreditCard" class="icon-md" />
-            </div>
-            <h3 class="feature-title">Paiement sécurisé</h3>
-            <p class="feature-text">Payez en toute confiance via Stripe. Vos données bancaires sont protégées.</p>
-          </article>
-
-          <article class="feature-card">
-            <div class="feature-icon feature-icon-purple">
-              <app-icon name="Shield" class="icon-md" />
-            </div>
-            <h3 class="feature-title">Prestataires vérifiés</h3>
-            <p class="feature-text">Tous nos prestataires sont contrôlés et évalués par notre communauté.</p>
-          </article>
-        </div>
-      </section>
-    </div>
+    <!-- Infos pratiques -->
+    <section id="infos" class="infos">
+      <div class="infos-card">
+        <span class="eyebrow eyebrow-light">Infos pratiques</span>
+        <h2>Nous trouver</h2>
+        <ul class="infos-list">
+          <li><app-icon name="MapPin" class="icon-sm" /> {{ salon.address }}</li>
+          <li><app-icon name="Phone" class="icon-sm" /> {{ salon.phone }}</li>
+          @for (h of salon.hours; track h.days) {
+            <li><app-icon name="Clock" class="icon-sm" /> <strong>{{ h.days }}</strong> — {{ h.time }}</li>
+          }
+        </ul>
+        <a routerLink="/booking/new" class="btn-brand btn-light">Prendre rendez-vous</a>
+      </div>
+    </section>
   `,
 })
 export class HomeComponent {
-  protected readonly authStore = inject(AuthStore);
+  private readonly salonService = inject(SalonService);
+
+  protected readonly salon = SALON;
+  protected readonly images = SALON_IMAGES;
+
+  protected readonly state = toSignal(
+    this.salonService.stylists$.pipe(
+      map((stylists): StylistsState => ({ status: 'ready', stylists })),
+      catchError(() => of<StylistsState>({ status: 'error' })),
+    ),
+    { initialValue: { status: 'loading' } as StylistsState },
+  );
+
+  protected stylists(): Stylist[] {
+    const s = this.state();
+    return s.status === 'ready' ? s.stylists : [];
+  }
+
+  protected readonly price = formatPrice;
+  protected readonly duration = formatDuration;
+  protected readonly initials = initials;
+  protected readonly name = stylistName;
 }

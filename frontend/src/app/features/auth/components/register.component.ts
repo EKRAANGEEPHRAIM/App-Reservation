@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../../core/components/icon.component';
@@ -14,8 +14,8 @@ import { AuthStore } from '../store/auth.store';
     <div class="auth-page">
       <div class="auth-card">
         <div class="auth-header">
-          <h1 class="auth-title">Créer un compte</h1>
-          <p class="auth-subtitle">Rejoignez notre plateforme</p>
+          <h1 class="auth-title">Créer mon compte</h1>
+          <p class="auth-subtitle">Pour réserver et retrouver vos rendez-vous chez Maison Awa</p>
         </div>
 
         <form (ngSubmit)="onSubmit()" class="auth-form">
@@ -56,17 +56,6 @@ import { AuthStore } from '../store/auth.store';
             />
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Je suis</label>
-            <select
-              [(ngModel)]="role" name="role"
-              class="form-select"
-            >
-              <option value="CLIENT">Client — Je prends des rendez-vous</option>
-              <option value="PROVIDER">Prestataire — Je propose des services</option>
-            </select>
-          </div>
-
           @if (authStore.error()) {
             <div class="alert-error">
               {{ authStore.error() }}
@@ -87,7 +76,7 @@ import { AuthStore } from '../store/auth.store';
 
         <p class="auth-footer">
           Déjà un compte ?
-          <a routerLink="/auth/login" class="auth-link">Se connecter</a>
+          <a routerLink="/auth/login" [queryParams]="{ returnUrl: returnUrl() }" class="auth-link">Se connecter</a>
         </p>
       </div>
     </div>
@@ -100,7 +89,9 @@ export class RegisterComponent {
   protected lastName = '';
   protected email = '';
   protected password = '';
-  protected role: 'CLIENT' | 'PROVIDER' = 'CLIENT';
+
+  /** Page à rouvrir après l'inscription (ex. : le récapitulatif de réservation) */
+  readonly returnUrl = input<string>();
 
   protected onSubmit(): void {
     if (!this.email || !this.password || !this.firstName || !this.lastName) return;
@@ -109,7 +100,7 @@ export class RegisterComponent {
       password: this.password,
       firstName: this.firstName,
       lastName: this.lastName,
-      role: this.role,
+      returnUrl: this.returnUrl(),
     });
   }
 }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../../core/components/icon.component';
 import { AdminStore } from '../store/admin.store';
@@ -22,7 +22,7 @@ const STATUS_STYLES: Record<string, string> = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CurrencyPipe, RouterLink, IconComponent],
+  imports: [DecimalPipe, RouterLink, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./dashboard.component.css'],
   template: `
@@ -86,7 +86,7 @@ const STATUS_STYLES: Record<string, string> = {
                   <app-icon name="DollarSign" class="icon-sm" />
                 </div>
               </div>
-              <p class="stat-value">{{ store.stats()?.totalRevenue ?? 0 | currency:'EUR':'symbol':'1.0-0':'fr-FR' }}</p>
+              <p class="stat-value">{{ store.stats()?.totalRevenue ?? 0 | number: '1.0-0' }} FCFA</p>
             </div>
 
             <div class="stat-card stat-card-average">
@@ -98,7 +98,7 @@ const STATUS_STYLES: Record<string, string> = {
               </div>
               <p class="stat-value">
                 @if (store.stats()?.totalBookings && store.stats()!.totalBookings > 0) {
-                  {{ ((store.stats()!.totalRevenue / store.stats()!.totalBookings)).toFixed(0) }}€
+                  {{ ((store.stats()!.totalRevenue / store.stats()!.totalBookings)).toFixed(0) }} FCFA
                 } @else {
                   —
                 }

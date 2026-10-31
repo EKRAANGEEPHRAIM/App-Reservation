@@ -9,7 +9,7 @@ import {
   UpdateBookingStatusDto,
 } from './schemas/booking.schema';
 
-interface AuthRequest { user: { id: string } }
+interface AuthRequest { user: { id: string; role: string } }
 
 @Controller('bookings')
 @UseGuards(AuthGuard('jwt'))
@@ -31,7 +31,7 @@ export class BookingsController {
 
   @Get('provider')
   async providerBookings(@Request() req: AuthRequest) {
-    return this.bookingsService.findByProvider(req.user.id);
+    return this.bookingsService.findByProviderUser(req.user.id);
   }
 
   @Get(':id')
@@ -41,9 +41,10 @@ export class BookingsController {
 
   @Patch(':id/status')
   async updateStatus(
+    @Request() req: AuthRequest,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateBookingStatusSchema)) dto: UpdateBookingStatusDto,
   ) {
-    return this.bookingsService.updateStatus(id, dto);
+    return this.bookingsService.updateStatus(id, dto, req.user);
   }
 }

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../../core/components/icon.component';
 import { ApiService } from '../../../core/services/api.service';
 
@@ -19,12 +20,16 @@ const DAY_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-availability-manager',
   standalone: true,
-  imports: [FormsModule, IconComponent],
+  imports: [FormsModule, RouterLink, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./availability-manager.component.css'],
   template: `
     <div class="availability-page">
       <header class="page-header">
+        <a routerLink="/provider/bookings" class="btn-action">
+          <app-icon name="ChevronLeft" class="icon-sm" />
+          Mes rendez-vous
+        </a>
         <h1>Gérer mes disponibilités</h1>
         <p>Définissez vos horaires de travail</p>
       </header>

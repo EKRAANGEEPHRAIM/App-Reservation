@@ -4,7 +4,6 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import helmet from 'helmet';
-import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -16,13 +15,8 @@ async function bootstrap(): Promise<void> {
   app.use(helmet())
   app.setGlobalPrefix('api/v1');
   app.useGlobalFilters(new GlobalExceptionFilter());
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    })
-  )
+  // Validation : chaque route utilise ZodValidationPipe. Pas de ValidationPipe global,
+  // qui exigerait class-validator (absent du projet) et ferait planter le démarrage.
 
   app.enableCors({
     origin: process.env.FRONTEND_URL ?? 'http://localhost:4200',

@@ -4,7 +4,7 @@
   "buildCommand": "npm run build:prod",
   "outputDirectory": "dist/reservation-frontend/browser",
   "rewrites": [
-    { "source": "/api/v1/:path*", "destination": "https://app-reservation-api.onrender.com/api/v1/:path*" },
+    { "source": "/api/v1/:path*", "destination": "https://app-reservation-q6qn.onrender.com/api/v1/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

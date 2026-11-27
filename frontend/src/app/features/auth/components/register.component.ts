@@ -21,39 +21,49 @@ import { AuthStore } from '../store/auth.store';
         <form (ngSubmit)="onSubmit()" class="auth-form">
           <div class="name-fields">
             <div class="form-group">
-              <label class="form-label">Prénom</label>
+              <label class="form-label" for="register-first-name">Prénom</label>
               <input
+                id="register-first-name"
                 type="text" [(ngModel)]="firstName" name="firstName" required
+                autocomplete="given-name"
                 class="form-input"
-                placeholder="Jean"
+                placeholder="Aya"
               />
             </div>
             <div class="form-group">
-              <label class="form-label">Nom</label>
+              <label class="form-label" for="register-last-name">Nom</label>
               <input
+                id="register-last-name"
                 type="text" [(ngModel)]="lastName" name="lastName" required
+                autocomplete="family-name"
                 class="form-input"
-                placeholder="Dupont"
+                placeholder="Koné"
               />
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Email</label>
+            <label class="form-label" for="register-email">Email</label>
             <input
+              id="register-email"
               type="email" [(ngModel)]="email" name="email" required
+              autocomplete="email"
               class="form-input"
               placeholder="votre@email.com"
             />
           </div>
 
           <div class="form-group">
-            <label class="form-label">Mot de passe</label>
+            <label class="form-label" for="register-password">Mot de passe</label>
             <input
+              id="register-password"
               type="password" [(ngModel)]="password" name="password" required minlength="8"
+              autocomplete="new-password"
+              aria-describedby="register-password-hint"
               class="form-input"
               placeholder="Min. 8 caractères"
             />
+            <span id="register-password-hint" class="visually-hidden">8 caractères minimum.</span>
           </div>
 
           @if (authStore.error()) {
@@ -75,7 +85,7 @@ import { AuthStore } from '../store/auth.store';
         </form>
 
         <p class="auth-footer">
-          Déjà un compte ?
+          Déjà un compte ?
           <a routerLink="/auth/login" [queryParams]="{ returnUrl: returnUrl() }" class="auth-link">Se connecter</a>
         </p>
       </div>

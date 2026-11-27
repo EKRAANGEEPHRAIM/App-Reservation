@@ -36,12 +36,12 @@ const STATUS_CHIP: Record<string, string> = {
 
       @if (booked()) {
         <div class="alert alert-success">
-          Demande envoyée ! Votre coiffeuse va la confirmer ; vous paierez au salon le jour du rendez-vous.
+          Demande envoyée ! Votre coiffeuse va la confirmer ; vous paierez au salon le jour du rendez-vous.
         </div>
       }
       @if (payment() === 'cancelled') {
         <div class="alert alert-warning">
-          Paiement annulé : votre réservation reste en attente, vous pouvez payer plus tard.
+          Paiement annulé : votre réservation reste en attente, vous pouvez payer plus tard.
         </div>
       }
       @if (store.error()) {

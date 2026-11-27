@@ -46,6 +46,14 @@
   color: var(--gray-700);
 }
 
+/* Liens du menu : 44 px de haut, la taille d'un doigt (WCAG 2.5.8 demande au moins 24 px) */
+.nav a:not(.btn-brand),
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
 .nav a:not(.btn-brand):hover,
 .nav a.active,
 .link-button:hover {

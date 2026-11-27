@@ -254,6 +254,7 @@
 .member-link {
   display: inline-flex;
   align-items: center;
+  min-height: 2.75rem;
   gap: var(--space-1);
   font-size: var(--font-sm);
   font-weight: var(--font-weight-semibold);

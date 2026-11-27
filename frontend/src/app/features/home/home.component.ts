@@ -82,9 +82,9 @@ type StylistsState = { status: 'loading' } | { status: 'error' } | { status: 're
       <img class="split-img" [src]="images.interior" alt="Intérieur du salon : fauteuils et miroirs ronds" loading="lazy" />
       <div class="split-text">
         <span class="eyebrow">Le salon</span>
-        <h2>Votre créneau vous attend, sans file d'attente</h2>
+        <h2>Ici, on ne patiente pas deux heures sur le banc.</h2>
         <ul class="checks">
-          <li><app-icon name="Check" class="icon-sm" /> Un horaire réservé est un horaire tenu : pas d'attente sur place.</li>
+          <li><app-icon name="Check" class="icon-sm" /> Un horaire réservé est un horaire tenu : pas d'attente sur place.</li>
           <li><app-icon name="Check" class="icon-sm" /> Des produits choisis pour les cheveux crépus, frisés et défrisés.</li>
           <li><app-icon name="Check" class="icon-sm" /> Confirmation de votre coiffeuse dès qu'elle valide la demande.</li>
         </ul>
@@ -96,7 +96,7 @@ type StylistsState = { status: 'loading' } | { status: 'error' } | { status: 're
     <section id="equipe" class="section">
       <div class="section-head">
         <span class="eyebrow">L'équipe</span>
-        <h2>Des spécialistes pour chaque style</h2>
+        <h2>Chacun son métier, chacun son fauteuil</h2>
       </div>
       @if (state().status === 'ready') {
         <div class="team">
@@ -123,8 +123,8 @@ type StylistsState = { status: 'loading' } | { status: 'error' } | { status: 're
     <section class="gallery" aria-label="Réalisations">
       <img [src]="images.braids" alt="Queue de cheval tressée, de profil" loading="lazy" />
       <div class="gallery-quote">
-        <p>« Des coiffures protectrices qui tiennent, réalisées dans le respect de vos cheveux. »</p>
-        <span>— L'esprit de la maison</span>
+        <p>« Des coiffures protectrices qui tiennent, réalisées dans le respect de vos cheveux. »</p>
+        <span>— Awa Koné, fondatrice</span>
       </div>
       <img [src]="images.locs" alt="Portrait d'une femme aux longues locks" loading="lazy" />
     </section>
@@ -133,7 +133,7 @@ type StylistsState = { status: 'loading' } | { status: 'error' } | { status: 're
     <section class="section steps-section">
       <div class="section-head">
         <span class="eyebrow">Réserver en ligne</span>
-        <h2>Trois étapes, moins d'une minute</h2>
+        <h2>Réserver prend moins de temps qu'un shampoing</h2>
       </div>
       <ol class="steps">
         <li><span class="step-num">1</span><h3>Choisissez</h3><p>La prestation et la coiffeuse qui vous conviennent.</p></li>

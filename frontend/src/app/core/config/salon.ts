@@ -9,8 +9,9 @@ export const SALON = {
   phone: '+225 07 00 00 00 00',
   email: 'contact@maison-awa.demo',
   hours: [
-    { days: 'Mardi – Samedi', time: '9h – 19h' },
-    { days: 'Lundi', time: 'Barbier seulement, 10h – 20h' },
+    // « 9 h » avec une espace insécable : norme typographique française pour les heures
+    { days: 'Mardi – Samedi', time: '9 h – 19 h' },
+    { days: 'Lundi', time: 'Barbier seulement, 10 h – 20 h' },
     { days: 'Dimanche', time: 'Fermé' },
   ],
 } as const;

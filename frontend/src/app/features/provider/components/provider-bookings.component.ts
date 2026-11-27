@@ -90,7 +90,7 @@ const STATUS_CHIP: Record<string, string> = {
             <span class="contact">{{ booking.client.phone ?? booking.client.email }}</span>
           </p>
           @if (booking.notes) {
-            <p class="notes">« {{ booking.notes }} »</p>
+            <p class="notes">« {{ booking.notes }}&nbsp;»</p>
           }
         </div>
         <div class="booking-side">
@@ -139,7 +139,7 @@ export class ProviderBookingsComponent {
   }
 
   protected set(booking: ProviderBooking, status: Exclude<BookingStatus, 'PENDING'>): void {
-    if (status === 'CANCELLED' && !confirm('Annuler ce rendez-vous ? Le client verra la réservation comme annulée.')) {
+    if (status === 'CANCELLED' && !confirm('Annuler ce rendez-vous ? Le client verra la réservation comme annulée.')) {
       return;
     }
     this.store.updateStatus({ id: booking.id, status });

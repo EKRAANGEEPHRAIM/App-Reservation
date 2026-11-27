@@ -20,13 +20,15 @@ import { AuthStore } from '../store/auth.store';
 
         <form (ngSubmit)="onSubmit()" class="auth-form">
           <div class="form-group">
-            <label class="form-label">Email</label>
+            <label class="form-label" for="login-email">Email</label>
             <div class="input-wrapper">
               <app-icon name="Mail" class="input-icon" />
               <input
+                id="login-email"
                 type="email"
                 [(ngModel)]="email"
                 name="email"
+                autocomplete="email"
                 required
                 class="form-input"
                 placeholder="votre@email.com"
@@ -35,13 +37,15 @@ import { AuthStore } from '../store/auth.store';
           </div>
 
           <div class="form-group">
-            <label class="form-label">Mot de passe</label>
+            <label class="form-label" for="login-password">Mot de passe</label>
             <div class="input-wrapper">
               <app-icon name="Lock" class="input-icon" />
               <input
+                id="login-password"
                 [type]="showPassword() ? 'text' : 'password'"
                 [(ngModel)]="password"
                 name="password"
+                autocomplete="current-password"
                 required
                 class="form-input"
                 placeholder="••••••••"
@@ -50,6 +54,8 @@ import { AuthStore } from '../store/auth.store';
                 type="button"
                 (click)="showPassword.set(!showPassword())"
                 class="input-toggle"
+                [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                [attr.aria-pressed]="showPassword()"
               >
                 <app-icon [name]="showPassword() ? 'EyeOff' : 'Eye'" class="icon-sm" />
               </button>
@@ -75,7 +81,7 @@ import { AuthStore } from '../store/auth.store';
         </form>
 
         <p class="auth-footer">
-          Pas encore de compte ?
+          Pas encore de compte ?
           <a routerLink="/auth/register" [queryParams]="{ returnUrl: returnUrl() }" class="auth-link">S'inscrire</a>
         </p>
       </div>

@@ -54,7 +54,7 @@ const STYLISTS: StylistSeed[] = [
     email: 'yann@demo.app',
     firstName: 'Yann',
     lastName: 'Aka',
-    bio: 'Barbier : dégradés, contours nets et taille de barbe.',
+    bio: 'Barbier : dégradés, contours nets et taille de barbe.',
     days: ['MONDAY', ...TUESDAY_TO_SATURDAY],
     hours: ['10:00', '20:00'],
     services: [

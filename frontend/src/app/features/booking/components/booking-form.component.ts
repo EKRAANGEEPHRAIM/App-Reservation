@@ -81,7 +81,7 @@ const isoDay = (offsetDays: number): string =>
           <!-- Étape 2 : jour et heure -->
           @if (step() === 2) {
             <section>
-              <h2 class="step-title">Quel jour ?</h2>
+              <h2 class="step-title">Quel jour ?</h2>
               <div class="days" role="listbox" aria-label="Jour du rendez-vous">
                 @for (d of days; track d) {
                   <button
@@ -99,7 +99,7 @@ const isoDay = (offsetDays: number): string =>
                 }
               </div>
 
-              <h2 class="step-title">À quelle heure ?</h2>
+              <h2 class="step-title">À quelle heure ?</h2>
               @switch (slotsState().status) {
                 @case ('loading') {
                   <p class="muted">Recherche des créneaux libres…</p>
@@ -129,7 +129,7 @@ const isoDay = (offsetDays: number): string =>
           @if (step() === 3) {
             <section>
               <h2 class="step-title">Vérifiez et confirmez</h2>
-              <label class="field-label" for="notes">Un message pour {{ selectedStylist()?.user?.firstName }} ? (facultatif)</label>
+              <label class="field-label" for="notes">Un message pour {{ selectedStylist()?.user?.firstName }}&nbsp;? (facultatif)</label>
               <textarea
                 id="notes"
                 class="notes"
@@ -162,7 +162,7 @@ const isoDay = (offsetDays: number): string =>
                 <p class="fine-print">Paiement en ligne sécurisé par Stripe (mode test pour cette démo).</p>
               } @else {
                 <div class="login-box">
-                  <p>Connectez-vous pour confirmer : vos choix sont conservés.</p>
+                  <p>Connectez-vous pour confirmer : vos choix sont conservés.</p>
                   <div class="confirm-actions">
                     <a routerLink="/auth/login" [queryParams]="{ returnUrl: currentUrl() }" class="btn-brand">Se connecter</a>
                     <a routerLink="/auth/register" [queryParams]="{ returnUrl: currentUrl() }" class="btn-outline">Créer un compte</a>

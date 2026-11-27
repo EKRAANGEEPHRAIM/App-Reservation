@@ -10,7 +10,7 @@ rendez-vous depuis leur espace, et l'administrateur suit l'activité.
 
 ## Essayer la démo
 
-**Application :** _lien à ajouter après déploiement_
+**Application :** https://app-reservation-three.vercel.app
 
 | Rôle | E-mail | Mot de passe | Ce qu'on peut tester |
 | --- | --- | --- | --- |

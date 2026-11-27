@@ -14,9 +14,9 @@ import { IconComponent } from '../../../core/components/icon.component';
         <div class="success-icon">
           <app-icon name="CheckCircle2" class="icon-lg" />
         </div>
-        <h1 class="success-title">Paiement réussi !</h1>
+        <h1 class="success-title">Paiement réussi !</h1>
         <p class="success-text">
-          Merci ! Votre réservation passe en « Confirmée » dès que Stripe valide le paiement,
+          Merci ! Votre réservation passe en « Confirmée » dès que Stripe valide le paiement,
           en général en quelques secondes.
         </p>
         <a routerLink="/booking" class="btn-primary">Voir mes réservations</a>

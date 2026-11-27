@@ -22,7 +22,7 @@ import { SALON } from '../config/salon';
         <div>
           <p class="footer-title">Horaires</p>
           @for (h of salon.hours; track h.days) {
-            <p class="footer-text">{{ h.days }} : {{ h.time }}</p>
+            <p class="footer-text">{{ h.days }}&nbsp;: {{ h.time }}</p>
           }
         </div>
         <div>
@@ -99,6 +99,7 @@ import { SALON } from '../config/salon';
     .signature {
       display: inline-flex;
       align-items: center;
+      min-height: 2.75rem;
       gap: var(--space-2);
       font-weight: var(--font-weight-semibold, 600);
       color: var(--gray-300);
